@@ -83,7 +83,8 @@ void cards::drawCard()
         {
             do
             {
-                std::cout << "\nDraw card from normal stack or show the top card of the discard stack?\n(1 for normal, 2 for discard stack): \n";
+                std::cout << "\n\nThere's currently a " << discardStack.back() << " on the discard stack.\n";
+                std::cout << "\nDraw card from normal stack or from discard stack?\n(1 for normal, 2 for discard stack): ";
                 if(!(std::cin >> choice))
                 {
                     std::cout << "Please select one of the above options.\n";
@@ -100,19 +101,8 @@ void cards::drawCard()
                     }
                     case 2:
                     {
-                         char yn;
-                         std::cout << "\nDo you want to draw " << discardStack.back() << " ? (y\\n)";
-                         std::cin >> yn;
-                         if(yn == 'y')
-                         {
-                             cardPointer->push_back(discardStack.back());
-                             discardStack.pop_back();
-                         }
-                         else
-                         {
-                             cardPointer->push_back(stack1.back());
-                             stack1.pop_back();
-                         }
+                         cardPointer->push_back(discardStack.back());
+                         discardStack.pop_back();
                          break;
                     }
                 }
@@ -783,9 +773,6 @@ void cards::discardCard(int pos)
     else
     {
         cardPointer = &computerCards;
-        std::cout << " **** DEBUG **** pointer set to comCards, cout before pushback\n";
-        for(unsigned int i = 0; i < discardStack.size(); i++)
-            std::cout << discardStack.at(i) << '\n';
         std::cout << "The computer has discarded a card. Its turn is over.\n";
     }
 
@@ -798,9 +785,6 @@ void cards::discardCard(int pos)
         cardValue = cardPointer->at(pos-1);
         cardPointer->erase(cardPointer->begin() + pos -1);
         discardStack.push_back(cardValue);
-        std::cout << " **** DEBUG **** cout after pushback\n";
-        for(unsigned int i = 0; i < discardStack.size(); i++)
-            std::cout << discardStack.at(i) << '\n';
         updateCardProperties();
     }
 
