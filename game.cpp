@@ -74,7 +74,8 @@ void game::playerTurn()
             case 2:
             {
                 if(cardStack.checkPhase() == true)
-                    menu2string = "2 - Show my laid out phase";
+                   if(cardStack.getMenuStringCheck() == true)
+                        menu2string = "2 - Show my laid out phase";
                 break;
             }
             case 3:
@@ -153,5 +154,6 @@ void game::congrats()
     std::cout << " #     # #    # #   ## #    # #   #  #    #   #   #    # #      #    #   #   # #    # #   ## #    # \n";
     std::cout << "  #####   ####  #    #  ####  #    # #    #   #    ####  ###### #    #   #   #  ####  #    #  ####  \n";
     cardStack.initiateNextRound();
+    comCheck = false;
     gameStart();
 }

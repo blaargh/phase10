@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 3;
+    playerPhase = 1;
     computerPhase = 1;
 }
 
@@ -718,7 +718,7 @@ bool cards::addPhaseCards()
                         {
                             if(std::find(intUniques.begin(), intUniques.end(), intPlayerCards.at(c)) != intUniques.end())
                             {
-                                std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match either the set or the run!\n";
+                                std::cout << "Can't add " << playerCards.at(c) << "  to your phase on the board, it already exists in the run!\n";
                                 return false;
                             }
                             else
@@ -741,7 +741,7 @@ bool cards::addPhaseCards()
                         {
                             if(std::find(intUniques.begin(), intUniques.end(), intPlayerCards.at(c)) != intUniques.end())
                             {
-                                std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match either the set or the run!\n";
+                                std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it already exists in the run!\n";
                                 return false;
                             }
                             else
@@ -783,18 +783,26 @@ void cards::discardCard(int pos)
     else
     {
         cardPointer = &computerCards;
+        std::cout << " **** DEBUG **** pointer set to comCards, cout before pushback\n";
+        for(unsigned int i = 0; i < discardStack.size(); i++)
+            std::cout << discardStack.at(i) << '\n';
         std::cout << "The computer has discarded a card. Its turn is over.\n";
     }
 
-    if(cardPointer->size() != 1)
+    if(cardPointer->size() == 1)
+    {
+        cardPointer->clear();
+    }
+    else
     {
         cardValue = cardPointer->at(pos-1);
         cardPointer->erase(cardPointer->begin() + pos -1);
         discardStack.push_back(cardValue);
+        std::cout << " **** DEBUG **** cout after pushback\n";
+        for(unsigned int i = 0; i < discardStack.size(); i++)
+            std::cout << discardStack.at(i) << '\n';
         updateCardProperties();
     }
-    else
-        cardPointer->clear();
 
 }
 
