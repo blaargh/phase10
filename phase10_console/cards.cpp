@@ -84,7 +84,7 @@ void cards::drawCard()
             do
             {
                 std::cout << "\n\nThere's currently a " << discardStack.back() << " on the discard stack.\n";
-                std::cout << "\nDraw card from normal stack or from discard stack?\n(1 for normal, 2 for discard stack): ";
+                std::cout << "\nDraw card from normal stack or from discard stack?\n(1 for normal, 2 for discard stack): \n";
                 if(!(std::cin >> choice))
                 {
                     std::cout << "Please select one of the above options.\n";
