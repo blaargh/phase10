@@ -334,7 +334,6 @@ bool cards::checkPhase()
                 if(result.second == false)
                 {
                     result.first->second++;
-
                 }
             }
             for(auto &i : countMap)
