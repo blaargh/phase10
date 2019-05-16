@@ -211,10 +211,12 @@ bool cards::checkPhase()
         }
 
         case 2: // 6 cards of one color
+        case 5: // 7 cards of one color
         {
             std::vector<std::string> *cardPointer;
             std::string color;
             int p = 0;
+            int limit = 0;
             std::map<std::string, int> countMap;
             if(currentPlayer == 0)
             {
@@ -225,6 +227,11 @@ bool cards::checkPhase()
             }
             else
                 cardPointer = &computerCardColors;
+
+            if(playerPhase == 2)
+                limit = 6;
+            else
+                limit = 7;
 
             std::sort(cardPointer->begin(), cardPointer->end());
 
@@ -238,14 +245,14 @@ bool cards::checkPhase()
             }
             for(auto &i : countMap)
             {
-                if(i.second >= 6)
+                if(i.second >= limit)
                 {
                     color = i.first;
                     p = i.second;
                 }
             }
 
-            if(p >= 6)
+            if(p >= limit)
             {
                 if(currentPlayer == 0)
                 {
@@ -257,7 +264,7 @@ bool cards::checkPhase()
                         }
                         else
                         {
-                            std::cout << "Phase 2 done! Your current amount of " << color << " is: " << p << "\n\n";
+                            std::cout << "Phase " << playerPhase <<" done! Your current amount of " << color << " is: " << p << "\n\n";
                             layOutPhase();
                         }
                     }
@@ -268,7 +275,7 @@ bool cards::checkPhase()
                     }
                 }
                 else
-                    std::cout << "The computer finished phase 2.\n";
+                    std::cout << "The computer finished phase " << computerPhase << ".\n";
                 return true;
             }
             else
@@ -289,7 +296,7 @@ bool cards::checkPhase()
                     }
                 }
                 else
-                    std::cout << "The computer couldn't finish phase 2!\n\n";
+                    std::cout << "The computer couldn't finish phase " << computerPhase << "!\n\n";
                 return false;
             }
             break;
@@ -562,13 +569,6 @@ bool cards::checkPhase()
             }
             break;
         }
-
-        case 5: // 7 cards of one color
-        {
-            std::cout << "5 in the making...\n";
-            break;
-        }
-
         case 6: // 1 run of 9
         {
             std::cout << "6 in the making...\n";
@@ -654,8 +654,9 @@ void cards::layOutPhase()
                     break;
                 }
                 case 2:
+                case 5:
                 {
-                    if(checkPhase() == true && playerPhaseCards.size() != 7)
+                    if(checkPhase() == true && playerPhaseCards.size() < 8)
                     {
                         for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
                             playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
@@ -707,6 +708,7 @@ bool cards::addPhaseCards()
     {
         case 1:
         case 2:
+        case 5:
         {
             std::vector<std::string> *pPlayerCards;
             std::vector<std::string> *pPhaseCards;
@@ -715,7 +717,7 @@ bool cards::addPhaseCards()
                 pPhaseCards = &playerPhaseCardValues;
                 pPlayerCards = &playerCardValues;
             }
-            if(playerPhase == 2)
+            if(playerPhase == 2 || playerPhase == 5)
             {
                 pPhaseCards = &playerPhaseCardColors;
                 pPlayerCards = &playerCardColors;
