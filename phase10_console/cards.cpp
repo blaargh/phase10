@@ -612,6 +612,7 @@ void cards::layOutPhase()
             std::string line;
             int number;
             unsigned int limit;
+            std::vector<int> cardPositions;
             std::cout << "Choose the cards you want to lay out for your current phase\n";
             getPlayerCards(0);
             std::cout << "Enter all card positions to lay out like this: \"1 2 3 4 5\" etc.\nCard Positions: ";
@@ -637,15 +638,18 @@ void cards::layOutPhase()
                     return;
                 }
                 else
+                {
                     playerPhaseCards.push_back(playerCards.at(number-1));
+                    cardPositions.push_back(number-1);
+                }
             }
 
             updateCardProperties();
 
             if(checkPhase() == true && playerPhaseCards.size() == limit)
             {
-                for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
-                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
+                for(unsigned int i = 0; i < cardPositions.size(); i++)
+                    playerCards.erase(playerCards.begin()+cardPositions.at(i));
                 playerPhaseOut = true;
                 std::cout << "You succesfully laid out your phase. Check your laid out cards with option 2.\n";
                 menuStringCheck = true;
