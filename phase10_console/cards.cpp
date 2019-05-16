@@ -763,6 +763,7 @@ bool cards::addPhaseCards()
             break;
         }
         case 3:
+        case 4:
         {
             std::map<int, int> countMap;
             std::vector<int> intPlayerCards, intUniques, intTwins;
@@ -865,7 +866,6 @@ bool cards::addPhaseCards()
             break;
         }
     }
-
     return 0;
 }
 
