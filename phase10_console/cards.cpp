@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 1;
+    playerPhase = 7;
     computerPhase = 1;
 }
 
@@ -38,7 +38,7 @@ void cards::createStack()
         stack1.push_back(i);
 
   //on macOS, use
-  //shuffle(stack1.begin(), stack1.end(), default_random_engine(rand()));
+  //shuffle(stack1.begin(), stack1.end(), std::default_random_engine(rand()));
 
     std::random_shuffle(stack1.begin(), stack1.end());
 }
@@ -549,7 +549,7 @@ bool cards::checkPhase()
                     }
                 }
                 else
-                    std::cout << "The computer finished phase 3.\n";
+                    std::cout << "The computer finished phase " << computerPhase << ".\n";
                 return true;
             }
             else
@@ -577,7 +577,87 @@ bool cards::checkPhase()
         }
         case 7: // 2 sets of 4
         {
-            std::cout << "7 in the making...\n";
+            std::vector<std::string> *cardPointer;
+            int p = 0;
+            std::map<std::string, int> countMap;
+
+            if(currentPlayer == 0)
+            {
+                if(playerPhaseOut == false && playerPhaseCardValues.empty())
+                    cardPointer = &playerCardValues;
+                else
+                    cardPointer = &playerPhaseCardValues;
+            }
+            else
+                cardPointer = &computerCardValues;
+
+            std::sort(cardPointer->begin(), cardPointer->end());
+
+            for(auto &i : *cardPointer)
+            {
+                auto result = countMap.insert(std::pair<std::string, int>(i, 1));
+                if(result.second == false)
+                {
+                    result.first->second++;
+                }
+            }
+            for(auto &i : countMap)
+            {
+                if(i.second == 4)
+                    p++;
+                if(i.second == 8)
+                    p = 2;
+                if(i.second > 4 && i.second < 8)
+                    p = 1;
+            }
+
+            if(p == 2)
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCardValues.empty())
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            std::cout << "Phase " << playerPhase << " done!\n";
+                            layOutPhase();
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                        getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer finished phase 7.\n";
+                return true;
+            }
+            else
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCardValues.empty())
+                            return false;
+                        else
+                            std::cout << "You have not finished the sets. You currently have " << p << " complete set(s)! Keep collecting.\n";
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                            getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer couldn't finish phase " << computerPhase << ".\n";
+                return false;
+            }
             break;
         }
 
@@ -620,7 +700,7 @@ void cards::layOutPhase()
             std::getline(std::cin, line);
             std::stringstream ss(line);
 
-            if(playerPhase == 1 || playerPhase == 3 || playerPhase == 4)
+            if(playerPhase == 1 || playerPhase == 3 || playerPhase == 4 || playerPhase == 7)
                 limit = 8;
             if(playerPhase == 6)
                 limit = 9;
@@ -713,10 +793,11 @@ bool cards::addPhaseCards()
         case 1:
         case 2:
         case 5:
+        case 7:
         {
             std::vector<std::string> *pPlayerCards;
             std::vector<std::string> *pPhaseCards;
-            if(playerPhase == 1)
+            if(playerPhase == 1 || playerPhase == 7)
             {
                 pPhaseCards = &playerPhaseCardValues;
                 pPlayerCards = &playerCardValues;
@@ -1036,6 +1117,11 @@ void cards::getCurrentPhaseDescr()
         case 6:
         {
             std::cout << "You are currently in Phase 6. It requires 1 run of 9 cards.\n";
+            break;
+        }
+        case 7:
+        {
+            std::cout << "You are currently in Phase 7. It requires 2 sets of 4 cards.\n";
             break;
         }
     }
