@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 1;
+    playerPhase = 4;
     computerPhase = 1;
 }
 
@@ -448,7 +448,118 @@ bool cards::checkPhase()
 
         case 4: // 1 run of 8
         {
-            std::cout << "4 in the making...\n";
+            std::vector<std::string> *cardPointer;
+            std::vector<int> intUniques;
+            std::vector<int> intTwins;
+            std::map<int, int> countMap;
+            if(currentPlayer == 0)
+            {
+                if(playerPhaseOut == false && playerPhaseCardValues.empty())
+                    cardPointer = &playerCardValues;
+                else
+                    cardPointer = &playerPhaseCardValues;
+            }
+            else
+                cardPointer = &computerCardValues;
+
+            for(auto &i : *cardPointer)
+            {
+                std::stringstream parser(i);
+                int x = 0;
+                parser >> x;
+
+                intTwins.push_back(x);
+            }
+            std::sort(intTwins.begin(), intTwins.end());
+            std::unique_copy(intTwins.begin(), intTwins.end(), std::back_inserter(intUniques));
+
+            int j = 0;
+            int k = 0;
+
+            for(unsigned int i = 0; i < intUniques.size(); i++)
+            {
+              if(i == 0)
+              {
+                if(intUniques.at(i)+1 == intUniques.at(i+1))
+                {
+                    j++;
+                    if(j>k)
+                        k=j;
+                }
+              }
+              else
+              {
+                 if(i == intUniques.size()-1)
+                 {
+                     if(intUniques.at(i-1)+1 == intUniques.at(i))
+                     {
+                         j++;
+                         if(j>k)
+                             k=j;
+                     }
+                 }
+                 else
+                 {
+                     if((intUniques.at(i+1)-intUniques.at(i) == 1) || (intUniques.at(i)-intUniques.at(i-1) == 1))
+                     {
+                         j++;
+                         if(j>k)
+                             k=j;
+                     }
+                     if((intUniques.at(i+1)-intUniques.at(i) != 1) || (intUniques.at(i)-intUniques.at(i-1) != 1))
+                     {
+                         j = 1;
+                     }
+                 }
+              }
+            }
+            if(k>=8)
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCardValues.empty())
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            std::cout << "Phase 4 done!\n";
+                            layOutPhase();
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                        getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer finished phase 3.\n";
+                return true;
+            }
+            else
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCardValues.empty())
+                            return false;
+                        else
+                            std::cout << "You have not finished the run. You currently have " << k << " consecutive cards. Keep collecting.\n";
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                            getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer couldn't finish phase 4.\n";
+                return false;
+            }
             break;
         }
 
@@ -525,6 +636,7 @@ void cards::layOutPhase()
             {
                 case 1:
                 case 3:
+                case 4:
                 {
                     if(checkPhase() == true && playerPhaseCards.size() < 9)
                     {
@@ -923,6 +1035,11 @@ void cards::getCurrentPhaseDescr()
         case 3:
         {
             std::cout << "You are currently in Phase 3. It requires 1 run of 4 and 1 set of 4.\n";
+            break;
+        }
+        case 4:
+        {
+            std::cout << "You are currently in Phase 4. It requires 1 run of 8 cards.\n.";
             break;
         }
     }
