@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 4;
+    playerPhase = 6;
     computerPhase = 1;
 }
 
@@ -251,7 +251,6 @@ bool cards::checkPhase()
                     p = i.second;
                 }
             }
-
             if(p >= limit)
             {
                 if(currentPlayer == 0)
@@ -454,11 +453,13 @@ bool cards::checkPhase()
         }
 
         case 4: // 1 run of 8
+        case 6: // 1 run of 9
         {
             std::vector<std::string> *cardPointer;
             std::vector<int> intUniques;
             std::vector<int> intTwins;
             std::map<int, int> countMap;
+            int limit = 0;
             if(currentPlayer == 0)
             {
                 if(playerPhaseOut == false && playerPhaseCardValues.empty())
@@ -468,6 +469,11 @@ bool cards::checkPhase()
             }
             else
                 cardPointer = &computerCardValues;
+
+            if(playerPhase == 4)
+                limit = 8;
+            else
+                limit = 9;
 
             for(auto &i : *cardPointer)
             {
@@ -520,7 +526,7 @@ bool cards::checkPhase()
                  }
               }
             }
-            if(k>=8)
+            if(k>=limit)
             {
                 if(currentPlayer == 0)
                 {
@@ -532,7 +538,7 @@ bool cards::checkPhase()
                         }
                         else
                         {
-                            std::cout << "Phase 4 done!\n";
+                            std::cout << "Phase " << playerPhase << " done!\n";
                             layOutPhase();
                         }
                     }
@@ -564,17 +570,11 @@ bool cards::checkPhase()
                     }
                 }
                 else
-                    std::cout << "The computer couldn't finish phase 4.\n";
+                    std::cout << "The computer couldn't finish phase " << computerPhase << ".\n";
                 return false;
             }
             break;
         }
-        case 6: // 1 run of 9
-        {
-            std::cout << "6 in the making...\n";
-            break;
-        }
-
         case 7: // 2 sets of 4
         {
             std::cout << "7 in the making...\n";
@@ -611,6 +611,7 @@ void cards::layOutPhase()
         {
             std::string line;
             int number;
+            unsigned int limit;
             std::cout << "Choose the cards you want to lay out for your current phase\n";
             getPlayerCards(0);
             std::cout << "Enter all card positions to lay out like this: \"1 2 3 4 5\" etc.\nCard Positions: ";
@@ -618,6 +619,14 @@ void cards::layOutPhase()
             std::getline(std::cin, line);
             std::stringstream ss(line);
 
+            if(playerPhase == 1 || playerPhase == 3 || playerPhase == 4)
+                limit = 8;
+            if(playerPhase == 6)
+                limit = 9;
+            if(playerPhase == 2)
+                limit = 6;
+            if(playerPhase == 5)
+                limit = 7;
 
             while(!ss.eof())
             {
@@ -632,46 +641,22 @@ void cards::layOutPhase()
             }
 
             updateCardProperties();
-            switch(playerPhase)
+
+            if(checkPhase() == true && playerPhaseCards.size() == limit)
             {
-                case 1:
-                case 3:
-                case 4:
-                {
-                    if(checkPhase() == true && playerPhaseCards.size() < 9)
-                    {
-                        for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
-                            playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
-                        playerPhaseOut = true;
-                        std::cout << "You succesfully laid out your phase. Check your laid out cards with option 2.\n";
-                        menuStringCheck = true;
-                    }
-                    else
-                    {
-                        std::cout << "The cards you entered are not valid to pass this phase, please select option 2 again and re-enter your cards.\n";
-                        playerPhaseCards.clear();
-                    }
-                    break;
-                }
-                case 2:
-                case 5:
-                {
-                    if(checkPhase() == true && playerPhaseCards.size() < 8)
-                    {
-                        for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
-                            playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
-                        playerPhaseOut = true;
-                        std::cout << "You succesfully laid out your phase. Check your laid out cards with option 2.\n";
-                        menuStringCheck = true;
-                    }
-                    else
-                    {
-                        std::cout << "The cards you entered are not valid to pass this phase, please select option 2 again and re-enter your cards.\n";
-                        playerPhaseCards.clear();
-                    }
-                    break;
-                }
+                for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
+                playerPhaseOut = true;
+                std::cout << "You succesfully laid out your phase. Check your laid out cards with option 2.\n";
+                menuStringCheck = true;
             }
+            else
+            {
+                std::cout << "The cards you entered are not valid to pass this phase, please select option 2 again and re-enter your cards.\n";
+                playerPhaseCards.clear();
+            }
+
+
         }
         else
         {
@@ -766,6 +751,7 @@ bool cards::addPhaseCards()
         }
         case 3:
         case 4:
+        case 6:
         {
             std::map<int, int> countMap;
             std::vector<int> intPlayerCards, intUniques, intTwins;
@@ -907,7 +893,7 @@ void cards::initiateNextRound()
 {
     if(playerCards.empty())
     {
-        std::cout << "Congratulations, you won phase " << playerPhase << "and will move up to phase " << playerPhase+1 << ".\n";
+        std::cout << "Congratulations, you won phase " << playerPhase << " and will move up to phase " << playerPhase+1 << ".\n";
         playerPhase++;
     }
     else
@@ -1041,7 +1027,17 @@ void cards::getCurrentPhaseDescr()
         }
         case 4:
         {
-            std::cout << "You are currently in Phase 4. It requires 1 run of 8 cards.\n.";
+            std::cout << "You are currently in Phase 4. It requires 1 run of 8 cards.\n";
+            break;
+        }
+        case 5:
+        {
+            std::cout << "You are currently in Phase 5. It requires 7 cards of one color.\n";
+            break;
+        }
+        case 6:
+        {
+            std::cout << "You are currently in Phase 6. It requires 1 run of 9 cards.\n";
             break;
         }
     }
