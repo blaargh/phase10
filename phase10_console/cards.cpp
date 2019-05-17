@@ -71,10 +71,8 @@ void cards::drawCard()
     if(currentPlayer == 0)
     {
         cardPointer = &playerCards;
-
         if(discardStack.empty())
         {
-            choice = 1;
             std::cout << "\nSorry, no cards on the discard stack at the moment! Card will be drawn from normal stack\n";
             cardPointer->push_back(stack1.back());
             stack1.pop_back();
