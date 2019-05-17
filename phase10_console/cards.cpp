@@ -689,7 +689,7 @@ void cards::layOutPhase()
         {
             std::string line;
             int number;
-            unsigned int limit;
+            unsigned int limit = 0;
             std::vector<int> cardPositions;
             std::cout << "Choose the cards you want to lay out for your current phase\n";
             getPlayerCards(0);
@@ -829,7 +829,7 @@ bool cards::addPhaseCards()
                 }
                 else
                 {
-                    std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match any of the colors!\n";
+                    std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match the phase!\n";
                     return false;
                 }
             }
