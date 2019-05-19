@@ -17,35 +17,24 @@ cards::cards()
 
 void cards::createStack()
 {
-    cardStruct fullStack;
-    for(int x = 0; x < 4; x++)
-        for(int i = 0; i < 12; i++)
-        {
-            if(i < 9)
-            {
-                // for readability reasons, and to be able to easily seperate numbers and colors later, a second space is added for single digits
-                std::string card = fullStack.cardValue.at(i)+ "  " +fullStack.cardColor.at(x);
-                stack1.push_back(card);
-            }
-            else
-            {
-                std::string card = fullStack.cardValue.at(i) + " " + fullStack.cardColor.at(x);
-                stack1.push_back(card);
-            }
-        }
+    cardStruct stackCards;
+    for(int j = 0; j < 2; j++)
+     for(int x = 0; x < 4; x++)
+         for(int i = 0; i < 12; i++)
+         {
+             cardStack.push_back(std::make_pair(stackCards.cardValue.at(i), stackCards.cardColor.at(x)));
+         }
     // double all cards in the stack
-    for(std::string i : stack1)
-        stack1.push_back(i);
 
   //on macOS, use
-  //shuffle(stack1.begin(), stack1.end(), std::default_random_engine(rand()));
+  //shuffle(cardStack.begin(), cardStack.end(), std::default_random_engine(rand()));
 
-    std::random_shuffle(stack1.begin(), stack1.end());
+    std::random_shuffle(cardStack.begin(), cardStack.end());
 }
 
 void cards::giveInitialCards()
 {
-    std::vector<std::string> *cardPointer;
+    std::vector<std::pair<int, std::string>> *cardPointer;
 
     if(currentPlayer == 0)
     {
@@ -56,16 +45,15 @@ void cards::giveInitialCards()
 
     for(int i = 0; i < 10; i++)
     {
-        cardPointer->push_back(stack1.back());
-        stack1.pop_back();
+        cardPointer->push_back(cardStack.back());
+        cardStack.pop_back();
     }
     updateCardProperties();
-
 }
 
 void cards::drawCard()
 {
-    std::vector<std::string> *cardPointer;
+    std::vector<std::pair<int, std::string>> *cardPointer;
     int choice;
 
     if(currentPlayer == 0)
@@ -74,14 +62,14 @@ void cards::drawCard()
         if(discardStack.empty())
         {
             std::cout << "\nSorry, no cards on the discard stack at the moment! Card will be drawn from normal stack\n";
-            cardPointer->push_back(stack1.back());
-            stack1.pop_back();
+            cardPointer->push_back(cardStack.back());
+            cardStack.pop_back();
         }
         else
         {
             do
             {
-                std::cout << "\n\nThere's currently a " << discardStack.back() << " on the discard stack.\n";
+                std::cout << "\n\nThere's currently a " << discardStack.back().first << " " << discardStack.back().second << " on the discard stack.\n";
                 std::cout << "\nDraw card from normal stack or from discard stack?\n(1 for normal, 2 for discard stack): \n";
                 if(!(std::cin >> choice))
                 {
@@ -93,8 +81,8 @@ void cards::drawCard()
                 {
                     case 1:
                     {
-                         cardPointer->push_back(stack1.back());
-                         stack1.pop_back();
+                         cardPointer->push_back(cardStack.back());
+                         cardStack.pop_back();
                          break;
                     }
                     case 2:
@@ -106,14 +94,14 @@ void cards::drawCard()
                 }
             } while(choice != 1 && choice != 2);
         }
-        std::cout << "\nYou drew a " << playerCards.at(playerCards.size()-1) << '\n';
+        std::cout << "\nYou drew a " << playerCards.at(playerCards.size()-1).first << " " << playerCards.at(playerCards.size()-1).second << '\n';
 
     }
     else
     {
         cardPointer = &computerCards;
-        cardPointer->push_back(stack1.back());
-        stack1.pop_back();
+        cardPointer->push_back(cardStack.back());
+        cardStack.pop_back();
     }
 
     updateCardProperties();
@@ -125,9 +113,9 @@ bool cards::checkPhase()
     {
         case 1: // 4 sets of 2
         {
-            std::vector<std::string> *cardPointer;
+            std::vector<int> *cardPointer;
             int p = 0;
-            std::map<std::string, int> countMap;
+            std::map<int, int> countMap;
             if(currentPlayer == 0)
             {
                 if(playerPhaseOut == false && playerPhaseCardValues.empty())
@@ -143,7 +131,7 @@ bool cards::checkPhase()
 
             for(auto &i : *cardPointer)
             {
-                auto result = countMap.insert(std::pair<std::string, int>(i, 1));
+                auto result = countMap.insert(std::pair<int, int>(i, 1));
                 if(result.second == false)
                 {
                     result.first->second++;
@@ -255,7 +243,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardColors.empty())
+                        if(!playerPhaseCards.empty())
                         {
                             return true;
                         }
@@ -281,7 +269,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardColors.empty())
+                        if(!playerPhaseCards.empty())
                             return false;
                         else
                             std::cout << "Not enough colors, keep collecting!\n";
@@ -301,13 +289,13 @@ bool cards::checkPhase()
 
         case 3: // 1 set of 4 + 1 run of 4
         {
-            std::vector<std::string> *cardPointer;
+            std::vector<int> *cardPointer;
             std::vector<int> intUniques;
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             if(currentPlayer == 0)
             {
-                if(playerPhaseOut == false && playerPhaseCardValues.empty())
+                if(playerPhaseOut == false && playerPhaseCards.empty())
                     cardPointer = &playerCardValues;
                 else
                     cardPointer = &playerPhaseCardValues;
@@ -317,11 +305,7 @@ bool cards::checkPhase()
 
             for(auto &i : *cardPointer)
             {
-                std::stringstream parser(i);
-                int x = 0;
-                parser >> x;
-
-                intTwins.push_back(x);
+                intTwins.push_back(i);
             }
             std::sort(intTwins.begin(), intTwins.end());
             std::unique_copy(intTwins.begin(), intTwins.end(), std::back_inserter(intUniques));
@@ -406,7 +390,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                         {
                             return true;
                         }
@@ -432,7 +416,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                             return false;
                         else
                             std::cout << "One or more of the phases requirements are not met, keep collecting.\n";
@@ -453,14 +437,14 @@ bool cards::checkPhase()
         case 4: // 1 run of 8
         case 6: // 1 run of 9
         {
-            std::vector<std::string> *cardPointer;
+            std::vector<int> *cardPointer;
             std::vector<int> intUniques;
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             int limit = 0;
             if(currentPlayer == 0)
             {
-                if(playerPhaseOut == false && playerPhaseCardValues.empty())
+                if(playerPhaseOut == false && playerPhaseCards.empty())
                     cardPointer = &playerCardValues;
                 else
                     cardPointer = &playerPhaseCardValues;
@@ -475,11 +459,7 @@ bool cards::checkPhase()
 
             for(auto &i : *cardPointer)
             {
-                std::stringstream parser(i);
-                int x = 0;
-                parser >> x;
-
-                intTwins.push_back(x);
+                intTwins.push_back(i);
             }
             std::sort(intTwins.begin(), intTwins.end());
             std::unique_copy(intTwins.begin(), intTwins.end(), std::back_inserter(intUniques));
@@ -530,7 +510,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                         {
                             return true;
                         }
@@ -556,7 +536,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                             return false;
                         else
                             std::cout << "You have not finished the run. You currently have " << k << " consecutive cards. Keep collecting.\n";
@@ -575,9 +555,9 @@ bool cards::checkPhase()
         }
         case 7: // 2 sets of 4
         {
-            std::vector<std::string> *cardPointer;
+            std::vector<int> *cardPointer;
             int p = 0;
-            std::map<std::string, int> countMap;
+            std::map<int, int> countMap;
 
             if(currentPlayer == 0)
             {
@@ -593,7 +573,7 @@ bool cards::checkPhase()
 
             for(auto &i : *cardPointer)
             {
-                auto result = countMap.insert(std::pair<std::string, int>(i, 1));
+                auto result = countMap.insert(std::pair<int, int>(i, 1));
                 if(result.second == false)
                 {
                     result.first->second++;
@@ -615,7 +595,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                         {
                             return true;
                         }
@@ -641,7 +621,7 @@ bool cards::checkPhase()
                 {
                     if(playerPhaseOut == false)
                     {
-                        if(!playerPhaseCardValues.empty())
+                        if(!playerPhaseCards.empty())
                             return false;
                         else
                             std::cout << "You have not finished the sets. You currently have " << p << " complete set(s)! Keep collecting.\n";
@@ -661,7 +641,120 @@ bool cards::checkPhase()
 
         case 8: // 1 run of 4 of one color + 1 set of 3
         {
-            std::cout << "8 in the making...\n";
+            std::vector<std::pair<int, std::string>> intUniques;
+            std::sort(playerCards.begin(), playerCards.end());
+
+            for(unsigned int i = 0; i < playerCards.size(); i++)
+            {
+                if(i == playerCards.size()-1)
+                {
+                    if(playerCards.at(i-1).first != playerCards.at(i).first)
+                        intUniques.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                }
+                else
+                {
+                    if(playerCards.at(i+1).first != playerCards.at(i).first)
+                        intUniques.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                }
+            }
+
+            for(unsigned int i = 0; i < intUniques.size(); i++)
+                std::cout << intUniques.at(i).first << " " << intUniques.at(i).second << '\n';
+
+
+            int j = 0;
+            int k = 0;
+
+            for(unsigned int i = 0; i < intUniques.size(); i++)
+            {
+              if(i == 0)
+              {
+                if(intUniques.at(i).first+1 == intUniques.at(i+1).first)
+                {
+                    j++;
+                    playerCardColors.push_back(intUniques.at(i).second);
+                    if(j>k)
+                        k=j;
+                }
+              }
+              else
+              {
+                 if(i == intUniques.size()-1)
+                 {
+                     if(intUniques.at(i-1).first+1 == intUniques.at(i).first)
+                     {
+                         j++;
+                         playerCardColors.push_back(intUniques.at(i).second);
+                         if(j>k)
+                             k=j;
+                     }
+                 }
+                 else
+                 {
+                     if((intUniques.at(i+1).first-intUniques.at(i).first == 1) || (intUniques.at(i).first-intUniques.at(i-1).first == 1))
+                     {
+                         j++;
+                         playerCardColors.push_back(intUniques.at(i).second);
+                         if(j>k)
+                             k=j;
+                     }
+                     else
+                     {
+                         if((intUniques.at(i+1).first-intUniques.at(i).first != 1) || (intUniques.at(i).first-intUniques.at(i-1).first != 1))
+                         {
+                             j = 1;
+                         }
+                     }
+                 }
+              }
+            }
+            if(k>=4)
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCards.empty())
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            std::cout << "Phase " << playerPhase << " done!\n";
+                            layOutPhase();
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                        getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer finished phase " << computerPhase << ".\n";
+                return true;
+            }
+            else
+            {
+                if(currentPlayer == 0)
+                {
+                    if(playerPhaseOut == false)
+                    {
+                        if(!playerPhaseCards.empty())
+                            return false;
+                        else
+                            std::cout << "You have not finished the run. You currently have " << k << " consecutive cards. Keep collecting.\n";
+                    }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                            getPlayerCards(1);
+                    }
+                }
+                else
+                    std::cout << "The computer couldn't finish phase " << computerPhase << ".\n";
+                return false;
+            }
             break;
         }
 
@@ -726,8 +819,8 @@ void cards::layOutPhase()
 
             if(checkPhase() == true && playerPhaseCards.size() == limit)
             {
-                for(unsigned int i = 0; i < cardPositions.size(); i++)
-                    playerCards.erase(playerCards.begin()+cardPositions.at(i));
+                for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerPhaseCards.at(i)), playerCards.end());
                 playerPhaseOut = true;
                 std::cout << "You succesfully laid out your phase. Check your laid out cards with option 2.\n";
                 menuStringCheck = true;
@@ -773,14 +866,13 @@ bool cards::addPhaseCards()
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
-        c--;
-
     }
     else
     {
         std::cout << "You have not finished your phase yet, keep collecting\n";
         return false;
     }
+    c--;
     if(c > playerCards.size()-1)
     {
         std::cout << "The card position you entered is not valid.\n";
@@ -789,21 +881,63 @@ bool cards::addPhaseCards()
     switch(playerPhase)
     {
         case 1:
-        case 2:
-        case 5:
         case 7:
         {
-            std::vector<std::string> *pPlayerCards;
-            std::vector<std::string> *pPhaseCards;
-            if(playerPhase == 1 || playerPhase == 7)
+            std::vector<int> *pPhaseCards,*pPlayerCards;
+            if(currentPlayer == 0)
             {
                 pPhaseCards = &playerPhaseCardValues;
                 pPlayerCards = &playerCardValues;
             }
-            if(playerPhase == 2 || playerPhase == 5)
+            else
+            {
+                pPhaseCards = &computerPhaseCardValues;
+                pPlayerCards = &computerCardValues;
+            }
+            if(playerCards.size() == 1)
+            {
+                if(std::find(pPhaseCards->begin(), pPhaseCards->end(), pPlayerCards->at(c)) != pPhaseCards->end())
+                {
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                    return true;
+                }
+                else
+                {
+                    std::cout << "Your last card does not match the phase, but you're close!\n";
+                    return false;
+                }
+            }
+            else
+            {
+                std::cout << playerCardValues.at(c) << '\n';
+                if(std::find(pPhaseCards->begin(), pPhaseCards->end(), pPlayerCards->at(c)) != pPhaseCards->end())
+                {
+                    playerPhaseCards.push_back(playerCards.at(c));
+                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out phase!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                    return true;
+                }
+                else
+                {
+                    std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match the sets!\n";
+                    return false;
+                }
+            }
+            break;
+        }
+        case 2:
+        case 5:
+        {
+            std::vector<std::string> *pPhaseCards,*pPlayerCards;
+            if(currentPlayer == 0)
             {
                 pPhaseCards = &playerPhaseCardColors;
                 pPlayerCards = &playerCardColors;
+            }
+            else
+            {
+                pPhaseCards = &computerPhaseCardColors;
+                pPlayerCards = &computerCardColors;
             }
             if(playerCards.size() == 1)
             {
@@ -823,13 +957,13 @@ bool cards::addPhaseCards()
                 if(std::find(pPhaseCards->begin(), pPhaseCards->end(), pPlayerCards->at(c)) != pPhaseCards->end())
                 {
                     playerPhaseCards.push_back(playerCards.at(c));
-                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1) << " to your laid out phase!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out phase!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
                     playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
                     return true;
                 }
                 else
                 {
-                    std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match the phase!\n";
+                    std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match the color!\n";
                     return false;
                 }
             }
@@ -844,17 +978,11 @@ bool cards::addPhaseCards()
             int k = 0;
             for(auto &i : playerPhaseCardValues)
             {
-                std::stringstream parser(i);
-                int x = 0;
-                parser >> x;
-                intUniques.push_back(x);
+                intUniques.push_back(i);
             }
             for(auto &i : playerCardValues)
             {
-                std::stringstream parser(i);
-                int x = 0;
-                parser >> x;
-                intPlayerCards.push_back(x);
+                intPlayerCards.push_back(i);
             }
             for(auto &i : intUniques)
             {
@@ -877,10 +1005,10 @@ bool cards::addPhaseCards()
                 }
             }
 
-            if(std::find(intTwins.begin(), intTwins.end(), intPlayerCards.at(c)) != intTwins.end())
+            if(std::find(intTwins.begin(), intTwins.end(), playerCards.at(c).first) != intTwins.end())
             {
                 playerPhaseCards.push_back(playerCards.at(c));
-                std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1) << " to your laid out set!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out set!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
                 playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
                 return true;
             }
@@ -892,20 +1020,20 @@ bool cards::addPhaseCards()
                     {
                         if(std::find(intUniques.begin(), intUniques.end(), intPlayerCards.at(c)) != intUniques.end())
                         {
-                            std::cout << "Can't add " << playerCards.at(c) << "  to your phase on the board, it already exists in the run!\n";
+                            std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << "  to your phase on the board, it already exists in the run!\n";
                             return false;
                         }
                         else
                         {
                             playerPhaseCards.push_back(playerCards.at(c));
-                            std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1) << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                            std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
                             playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
                             return true;
                         }
                     }
                     else
                     {
-                        std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it doesnt match either the set or the run!\n";
+                        std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match either the set or the run!\n";
                         return false;
                     }
                 }
@@ -915,20 +1043,20 @@ bool cards::addPhaseCards()
                     {
                         if(std::find(intUniques.begin(), intUniques.end(), intPlayerCards.at(c)) != intUniques.end())
                         {
-                            std::cout << "Can't add " << playerCards.at(c) << " to your phase on the board, it already exists in the run!\n";
+                            std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it already exists in the run!\n";
                             return false;
                         }
                         else
                         {
                             playerPhaseCards.push_back(playerCards.at(c));
-                            std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1) << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                            std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
                             playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
                             return true;
                         }
                     }
                 }
             }
-            break;
+        break;
         }
     }
     return 0;
@@ -936,13 +1064,12 @@ bool cards::addPhaseCards()
 
 void cards::discardCard(int pos)
 {
-    std::vector<std::string> *cardPointer;
-    std::string cardValue;
+    std::vector<std::pair<int, std::string>> *cardPointer, cardValue;
     if(currentPlayer == 0)
     {
         cardPointer = &playerCards;
         if(cardPointer->size() != 1)
-            std::cout << "You discarded: " << cardPointer->at(pos-1) << '\n';
+            std::cout << "You discarded: " << cardPointer->at(pos-1).first << " " << cardPointer->at(pos-1).second << '\n';
         else
             std::cout << "You discarded your last card.\n";
     }
@@ -958,10 +1085,8 @@ void cards::discardCard(int pos)
     }
     else
     {
-        cardValue = cardPointer->at(pos-1);
+        discardStack.push_back(std::make_pair(cardPointer->at(pos-1).first, cardPointer->at(pos-1).second));
         cardPointer->erase(cardPointer->begin() + pos -1);
-        discardStack.push_back(cardValue);
-        updateCardProperties();
     }
 
 }
@@ -992,7 +1117,7 @@ void cards::initiateNextRound()
     playerPhaseCards.clear();
     playerPhaseCardValues.clear();
     playerPhaseCardColors.clear();
-    stack1.clear();
+    cardStack.clear();
 }
 
 void cards::updateCardProperties()
@@ -1004,19 +1129,19 @@ void cards::updateCardProperties()
         playerPhaseCardValues.clear();
         playerPhaseCardColors.clear();
 
-        for(std::string i : playerCards)
-            playerCardValues.push_back(i.substr(0,2));
+        for(unsigned int i = 0; i < playerCards.size(); i++)
+            playerCardValues.push_back(playerCards.at(i).first);
 
-        for(std::string i : playerCards)
-            playerCardColors.push_back(i.substr(3,8));
+        for(unsigned int i = 0; i < playerCards.size(); i++)
+            playerCardColors.push_back(playerCards.at(i).second);
 
         if(!playerPhaseCards.empty())
         {
-            for(std::string i : playerPhaseCards)
-                playerPhaseCardValues.push_back(i.substr(0,2));
+            for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                playerPhaseCardValues.push_back(playerPhaseCards.at(i).first);
 
-            for(std::string i : playerPhaseCards)
-                playerPhaseCardColors.push_back(i.substr(3,8));
+            for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                playerPhaseCardColors.push_back(playerPhaseCards.at(i).second);
         }
     }
     else
@@ -1024,36 +1149,44 @@ void cards::updateCardProperties()
         computerCardValues.clear();
         computerCardColors.clear();
 
-        for(std::string i : computerCards)
-            computerCardValues.push_back(i.substr(0,2));
+        for(unsigned int i = 0; i < computerCards.size(); i++)
+            computerCardValues.push_back(computerCards.at(i).first);
 
-        for(std::string i : computerCards)
-            computerCardColors.push_back(i.substr(3,8));
+        for(unsigned int i = 0; i < computerCards.size(); i++)
+            computerCardColors.push_back(computerCards.at(i).second);
+
+        if(!computerPhaseCards.empty())
+        {
+            for(unsigned int i = 0; i < computerPhaseCards.size(); i++)
+                computerPhaseCardValues.push_back(computerPhaseCards.at(i).first);
+
+            for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                computerPhaseCardColors.push_back(computerPhaseCards.at(i).second);
+        }
     }
 
 }
 
 void cards::getPlayerCards(int i)
 {
-    std::vector<std::string> *cardPointer;
+    std::vector<std::pair<int, std::string>> *cardPointer;
     if(i == 0)
         cardPointer = &playerCards;
     else
         cardPointer = &playerPhaseCards;
-
 
     for(unsigned int i = 0; i < cardPointer->size(); i++)
     {
         if(i % 3 == 0)
             std::cout << '\n';
 
-        std::cout << "\t\t(" << i+1 << ") " << cardPointer->at(i) << "\t";
+        std::cout << "\t\t(" << i+1 << ") " << cardPointer->at(i).first << " " << cardPointer->at(i).second << "\t";
 
     }
     std::cout << '\n';
 }
 
-std::vector<std::string> cards::getPlayerVector()
+std::vector<std::pair<int, std::string>> cards::getPlayerVector()
 {
     return playerCards;
 }
