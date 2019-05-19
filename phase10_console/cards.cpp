@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 7;
+    playerPhase = 1;
     computerPhase = 1;
 }
 
