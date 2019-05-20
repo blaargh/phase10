@@ -11,7 +11,7 @@ cards::cards()
     srand(time(nullptr));
     createStack();
     currentPlayer = 0;
-    playerPhase = 1;
+    playerPhase = 8;
     computerPhase = 1;
 }
 
@@ -641,74 +641,115 @@ bool cards::checkPhase()
 
         case 8: // 1 run of 4 of one color + 1 set of 3
         {
-            std::vector<std::pair<int, std::string>> intUniques;
-            std::sort(playerCards.begin(), playerCards.end());
-
+            std::vector<std::string> tempColors;
+            std::vector<std::pair<int, std::string>> *cardPointer, intUniques;
+            std::map<std::string, int> countMap;
+            std::map<int,int> countMap2;
+            int j= 0,k = 0,p = 0, l = 0;
+            bool colors = false;
+            bool run = false;
+            bool set = false;
+            cardPointer = &intUniques;
             for(unsigned int i = 0; i < playerCards.size(); i++)
             {
-                if(i == playerCards.size()-1)
+                cardPointer->push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+            }
+
+            std::sort(cardPointer->begin(), cardPointer->end());
+
+            for(auto &i : playerCardValues)
+            {
+                auto result = countMap2.insert(std::pair<int, int>(i, 1));
+                if(result.second == false)
                 {
-                    if(playerCards.at(i-1).first != playerCards.at(i).first)
-                        intUniques.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                    result.first->second++;
+                }
+            }
+            for(auto &i : countMap2)
+            {
+                if(i.second > l)
+                {
+                    l=i.second;
+                }
+            }
+
+            for(unsigned int i = 0; i < intUniques.size(); i++)
+            {
+                if(i == 0)
+                {
+                  if(intUniques.at(i).first+1 == intUniques.at(i+1).first)
+                  {
+                      j++;
+
+                      if(intUniques.at(i).second == intUniques.at(i+1).second && tempColors.size() < 4)
+                           tempColors.push_back(intUniques.at(i).second);
+
+                      if(j>k)
+                          k=j;
+                  }
                 }
                 else
                 {
-                    if(playerCards.at(i+1).first != playerCards.at(i).first)
-                        intUniques.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                   if(i == intUniques.size()-1)
+                   {
+                       if(intUniques.at(i-1).first+1 == intUniques.at(i).first)
+                       {
+                           j++;
+                           if(intUniques.at(i-1).second == intUniques.at(i).second && tempColors.size() < 4)
+                                tempColors.push_back(intUniques.at(i).second);
+
+                           if(j>k)
+                               k=j;
+                       }
+                   }
+                   else
+                   {
+                       if(intUniques.at(i+1).first-intUniques.at(i).first == 1 || intUniques.at(i).first-intUniques.at(i-1).first == 1)
+                       {
+                           j++;
+                           if((intUniques.at(i+1).second == intUniques.at(i).second && tempColors.size() < 4) || (intUniques.at(i).second == intUniques.at(i-1).second && tempColors.size() < 4))
+                                tempColors.push_back(intUniques.at(i).second);
+
+                           if(j>k)
+                               k=j;
+                       }
+                       else
+                       {
+                           if(intUniques.at(i).first == intUniques.at(i+1).first || intUniques.at(i).first == intUniques.at(i-1).first)
+                               tempColors.push_back(intUniques.at(i).second);
+                       }
+                       if((intUniques.at(i+1).first-intUniques.at(i).first != 1) || (intUniques.at(i).first-intUniques.at(i-1).first != 1))
+                       {
+                           j = 1;
+                       }
+                   }
                 }
             }
 
-            for(unsigned int i = 0; i < intUniques.size(); i++)
-                std::cout << intUniques.at(i).first << " " << intUniques.at(i).second << '\n';
-
-
-            int j = 0;
-            int k = 0;
-
-            for(unsigned int i = 0; i < intUniques.size(); i++)
+            for(auto &i : tempColors)
             {
-              if(i == 0)
-              {
-                if(intUniques.at(i).first+1 == intUniques.at(i+1).first)
+                auto result = countMap.insert(std::pair<std::string, int>(i, 1));
+                if(result.second == false)
                 {
-                    j++;
-                    playerCardColors.push_back(intUniques.at(i).second);
-                    if(j>k)
-                        k=j;
+                    result.first->second++;
                 }
-              }
-              else
-              {
-                 if(i == intUniques.size()-1)
-                 {
-                     if(intUniques.at(i-1).first+1 == intUniques.at(i).first)
-                     {
-                         j++;
-                         playerCardColors.push_back(intUniques.at(i).second);
-                         if(j>k)
-                             k=j;
-                     }
-                 }
-                 else
-                 {
-                     if((intUniques.at(i+1).first-intUniques.at(i).first == 1) || (intUniques.at(i).first-intUniques.at(i-1).first == 1))
-                     {
-                         j++;
-                         playerCardColors.push_back(intUniques.at(i).second);
-                         if(j>k)
-                             k=j;
-                     }
-                     else
-                     {
-                         if((intUniques.at(i+1).first-intUniques.at(i).first != 1) || (intUniques.at(i).first-intUniques.at(i-1).first != 1))
-                         {
-                             j = 1;
-                         }
-                     }
-                 }
-              }
             }
+            for(auto &i : countMap)
+            {
+                if(i.second > p)
+                    p = i.second;
+            }
+
+            if(p>=4)
+                colors = true;
+
             if(k>=4)
+                run = true;
+
+            if(l>=3)
+                set = true;
+
+            if(colors == true && run == true && set == true)
             {
                 if(currentPlayer == 0)
                 {
@@ -743,7 +784,7 @@ bool cards::checkPhase()
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "You have not finished the run. You currently have " << k << " consecutive cards. Keep collecting.\n";
+                            std::cout << "You have not finished the phase. You currently have " << p << " consecutive cards of the same color and a set of " << l << ". Keep collecting.\n";
                     }
                     else
                     {
@@ -797,7 +838,7 @@ void cards::layOutPhase()
                 limit = 9;
             if(playerPhase == 2)
                 limit = 6;
-            if(playerPhase == 5)
+            if(playerPhase == 5 || playerPhase == 8)
                 limit = 7;
 
             while(!ss.eof())
