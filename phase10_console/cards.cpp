@@ -749,14 +749,14 @@ bool cards::checkPhase()
             }
             for(unsigned int i = 0; i < twinPairs.size(); i++)
             {
-                std::cout << twinPairs.at(i).first << " " << twinPairs.at(i).second << '\n';
-                if(std::find(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)) != locPlayerCards.end())
-                {
-                    locPlayerCards.erase(std::remove(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)), locPlayerCards.end());
-                }
+                locPlayerCards.erase(std::remove(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)), locPlayerCards.end());
             }
+
             for(unsigned int i = 0; i < locPlayerCards.size(); i++)
+            {
+                std::cout << locPlayerCards.at(i).first << " " << locPlayerCards.at(i).second << '\n';
                 intTwins.push_back(locPlayerCards.at(i).first);
+            }
 
             for(auto &i : intTwins)
             {
@@ -766,8 +766,6 @@ bool cards::checkPhase()
                     result.first->second++;
                 }
             }
-            for(unsigned int i = 0; i < intTwins.size(); i++)
-                std::cout << intTwins.at(i) << '\n';
             for(auto &i : countMap)
             {
                 if(p < i.second)
