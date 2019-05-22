@@ -641,21 +641,124 @@ bool cards::checkPhase()
 
         case 8: // 1 run of 4 of one color + 1 set of 3
         {
-            std::pair<int, std::string> tempColor;
-            std::vector<std::pair<int, std::string>> *cardPointer, intUniques;
-            std::map<int,int> countMap;
-            int j= 0,k = 0, l = 0;
+            std::vector<int> intTwins;
+            std::map<int, int> countMap;
+            std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
+            std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards;
+            int k = 0;
+            int l = 0;
+            int p = 0;
             bool run = false;
             bool set = false;
-            cardPointer = &intUniques;
             for(unsigned int i = 0; i < playerCards.size(); i++)
+                locPlayerCards.push_back(playerCards.at(i));
+
+            for(unsigned int i = 0; i < locPlayerCards.size(); i++)
             {
-                cardPointer->push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                if(locPlayerCards.at(i).second == "blue")
+                {
+                    bluePairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    std::sort(bluePairs.begin(), bluePairs.end());
+                }
+                if(locPlayerCards.at(i).second == "green")
+                {
+                    greenPairs.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
+                    std::sort(greenPairs.begin(), greenPairs.end());
+                }
+                if(locPlayerCards.at(i).second == "red")
+                {
+                    redPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    std::sort(redPairs.begin(), redPairs.end());
+                }
+                if(locPlayerCards.at(i).second == "yellow")
+                {
+                    yellowPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    std::sort(yellowPairs.begin(), yellowPairs.end());
+                }
             }
+            std::unique_copy(bluePairs.begin(), bluePairs.end(), std::back_inserter(blueUniques));
+            std::unique_copy(yellowPairs.begin(), yellowPairs.end(), std::back_inserter(yellowUniques));
+            std::unique_copy(redPairs.begin(), redPairs.end(), std::back_inserter(redUniques));
+            std::unique_copy(greenPairs.begin(), greenPairs.end(), std::back_inserter(greenUniques));
 
-            std::sort(cardPointer->begin(), cardPointer->end());
+            bluePairs.clear();
+            yellowPairs.clear();
+            redPairs.clear();
+            greenPairs.clear();
 
-            for(auto &i : playerCardValues)
+            vec_2d.push_back(blueUniques);
+            vec_2d.push_back(greenUniques);
+            vec_2d.push_back(redUniques);
+            vec_2d.push_back(yellowUniques);
+            std::sort(vec_2d.begin(), vec_2d.end());
+
+
+            for(unsigned int i = 0; i < vec_2d.size(); i++)
+            {
+                for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
+                {
+
+                   if(vec_2d.at(i).size() >= 4)
+                   {
+                       if(j == vec_2d.at(i).size()-1)
+                       {
+                           if(vec_2d.at(i).at(j-1).first+1 == vec_2d.at(i).at(j).first)
+                           {
+                               l++;
+                               if(l>k)
+                                   k=l;
+                               if(k == 4)
+                               {
+                                   for(unsigned int m = 0; m < 4; m++)
+                                        twinPairs.push_back(vec_2d.at(i).at(j-m));
+                               }
+                           }
+                       }
+                       else
+                       {
+                           if(j == 0)
+                           {
+                               if(vec_2d.at(i).at(j).first+1 == vec_2d.at(i).at(j+1).first)
+                               {
+                                   l++;
+                                   if(l>k)
+                                       k=l;
+                               }
+                           }
+                           else
+                           {
+                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first == 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first == 1))
+                               {
+                                   l++;
+                                   if(l>k)
+                                       k=l;
+                                   if(k == 4)
+                                   {
+                                       for(unsigned int m = 0; m < 4; m++)
+                                            twinPairs.push_back(vec_2d.at(i).at(j-m));
+                                   }
+                               }
+                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
+                               {
+                                   l = 1;
+                               }
+                           }
+                       }
+                    }
+                }
+            }
+            for(unsigned int i = 0; i < twinPairs.size(); i++)
+            {
+                std::cout << twinPairs.at(i).first << " " << twinPairs.at(i).second << '\n';
+                if(std::find(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)) != locPlayerCards.end())
+                {
+                    locPlayerCards.erase(std::remove(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)), locPlayerCards.end());
+                }
+            }
+            for(unsigned int i = 0; i < locPlayerCards.size(); i++)
+                intTwins.push_back(locPlayerCards.at(i).first);
+
+            for(auto &i : intTwins)
             {
                 auto result = countMap.insert(std::pair<int, int>(i, 1));
                 if(result.second == false)
@@ -663,78 +766,20 @@ bool cards::checkPhase()
                     result.first->second++;
                 }
             }
+            for(unsigned int i = 0; i < intTwins.size(); i++)
+                std::cout << intTwins.at(i) << '\n';
             for(auto &i : countMap)
             {
-                if(i.second > l)
+                if(p < i.second)
                 {
-                    l=i.second;
-                }
-            }
-
-            for(unsigned int i = 0; i < intUniques.size(); i++)
-            {
-                if(i == 0)
-                {
-                  if(intUniques.at(i).first+1 == intUniques.at(i+1).first)
-                  {
-                      if(intUniques.at(i).second == intUniques.at(i+1).second)
-                      {
-                          j++;
-                      }
-
-                      if(j>k)
-                          k=j;
-                  }
-                }
-                else
-                {
-                   if(i == intUniques.size()-1)
-                   {
-                       if(intUniques.at(i-1).first+1 == intUniques.at(i).first)
-                       {
-
-                           if(intUniques.at(i-1).second == intUniques.at(i).second)
-                           {
-                               j++;
-                           }
-                           if(j>k)
-                               k=j;
-                       }
-                   }
-                   else
-                   {
-                       if(intUniques.at(i+1).first-intUniques.at(i).first == 1 || intUniques.at(i).first-intUniques.at(i-1).first == 1)
-                       {
-                            if((intUniques.at(i).second == intUniques.at(i+1).second) || (intUniques.at(i).second == intUniques.at(i-1).second))
-                            {
-                                j++;
-                            }
-
-                            if(j>k)
-                               k=j;
-                        }
-                        if((intUniques.at(i+1).first-intUniques.at(i).first != 1) || (intUniques.at(i).first-intUniques.at(i-1).first != 1))
-                        {
-                            if((intUniques.at(i).first == intUniques.at(i+1).first) && j > 1)
-                            {
-                                tempColor = std::make_pair(intUniques.at(i).first, intUniques.at(i-1).second);
-                                if(std::find(intUniques.begin(), intUniques.end(), tempColor) != intUniques.end())
-                                    j++;
-                                if(j>k)
-                                   k=j;
-                            }
-                            j = 1;
-                        }
-                        if((intUniques.at(i+1).second != intUniques.at(i).second) || (intUniques.at(i).second != intUniques.at(i-1).second))
-                            j = 0;
-                   }
+                    p=i.second;
                 }
             }
 
             if(k>=4)
                 run = true;
 
-            if(l>=3)
+            if(p>=3)
                 set = true;
 
             if(run == true && set == true)
@@ -772,7 +817,7 @@ bool cards::checkPhase()
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "One or more of the phases requirements are not met, keep collecting.\n";
+                            std::cout << "You have not finished the phase. You currently have a run of " << k << " cards of the same color\nand a set of " << p << ". Keep collecting.\n";
                     }
                     else
                     {
