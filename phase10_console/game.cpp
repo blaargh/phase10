@@ -92,6 +92,11 @@ void game::playerTurn()
                         std::cin.clear();
                         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     }
+                    if(c <= 0 || c > 11)
+                    {
+                        std::cout << "The card position you entered does not exist, please select option 3 again and re-enter your card.\n";
+                        break;
+                    }
                     cardStack.discardCard(c);
                     std::cout << "\n\nNext turn is the computer\n";
                     computerTurn();
@@ -126,7 +131,7 @@ void game::playerTurn()
                 exit(0);
             }
         }
-    } while(c != 3);
+    } while(c != 6);
 }
 
 void game::computerTurn()

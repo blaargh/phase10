@@ -24,7 +24,6 @@ void cards::createStack()
          {
              cardStack.push_back(std::make_pair(stackCards.cardValue.at(i), stackCards.cardColor.at(x)));
          }
-    // double all cards in the stack
 
   //on macOS, use
   //shuffle(cardStack.begin(), cardStack.end(), std::default_random_engine(rand()));
@@ -644,42 +643,55 @@ bool cards::checkPhase()
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
-            std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards;
+            std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards, *cardPointer;
             int k = 0;
             int l = 0;
             int p = 0;
             bool run = false;
             bool set = false;
-            for(unsigned int i = 0; i < playerCards.size(); i++)
-                locPlayerCards.push_back(playerCards.at(i));
+
+            if(currentPlayer == 0)
+            {
+                if(playerPhaseOut == false && playerPhaseCards.empty())
+                    cardPointer = &playerCards;
+                else
+                    cardPointer = &playerPhaseCards;
+            }
+            else
+                cardPointer = &computerCards;
+
+            for(unsigned int i = 0; i < cardPointer->size(); i++)
+                locPlayerCards.push_back(cardPointer->at(i));
 
             for(unsigned int i = 0; i < locPlayerCards.size(); i++)
             {
                 if(locPlayerCards.at(i).second == "blue")
                 {
                     bluePairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
-                    std::sort(bluePairs.begin(), bluePairs.end());
                 }
                 if(locPlayerCards.at(i).second == "green")
                 {
-                    greenPairs.push_back(std::make_pair(playerCards.at(i).first, playerCards.at(i).second));
-                    std::sort(greenPairs.begin(), greenPairs.end());
+                    greenPairs.push_back(std::make_pair(playerCards.at(i).first, locPlayerCards.at(i).second));
                 }
                 if(locPlayerCards.at(i).second == "red")
                 {
                     redPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
-                    std::sort(redPairs.begin(), redPairs.end());
                 }
                 if(locPlayerCards.at(i).second == "yellow")
                 {
                     yellowPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
-                    std::sort(yellowPairs.begin(), yellowPairs.end());
                 }
             }
             std::unique_copy(bluePairs.begin(), bluePairs.end(), std::back_inserter(blueUniques));
             std::unique_copy(yellowPairs.begin(), yellowPairs.end(), std::back_inserter(yellowUniques));
             std::unique_copy(redPairs.begin(), redPairs.end(), std::back_inserter(redUniques));
             std::unique_copy(greenPairs.begin(), greenPairs.end(), std::back_inserter(greenUniques));
+
+
+            std::sort(blueUniques.begin(), blueUniques.end());
+            std::sort(greenUniques.begin(), greenUniques.end());
+            std::sort(redUniques.begin(), redUniques.end());
+            std::sort(yellowUniques.begin(), yellowUniques.end());
 
             bluePairs.clear();
             yellowPairs.clear();
@@ -747,16 +759,14 @@ bool cards::checkPhase()
                     }
                 }
             }
-            for(unsigned int i = 0; i < twinPairs.size(); i++)
+            if(!twinPairs.empty())
             {
-                locPlayerCards.erase(std::remove(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)), locPlayerCards.end());
+                for(unsigned int i = 0; i < twinPairs.size(); i++)
+                    locPlayerCards.erase(std::remove(locPlayerCards.begin(), locPlayerCards.end(), twinPairs.at(i)), locPlayerCards.end());
             }
 
             for(unsigned int i = 0; i < locPlayerCards.size(); i++)
-            {
-                std::cout << locPlayerCards.at(i).first << " " << locPlayerCards.at(i).second << '\n';
                 intTwins.push_back(locPlayerCards.at(i).first);
-            }
 
             for(auto &i : intTwins)
             {
@@ -1168,6 +1178,7 @@ void cards::discardCard(int pos)
             std::cout << "You discarded: " << cardPointer->at(pos-1).first << " " << cardPointer->at(pos-1).second << '\n';
         else
             std::cout << "You discarded your last card.\n";
+
     }
     else
     {
