@@ -561,9 +561,11 @@ bool cards::checkPhase()
             break;
         }
         case 7: // 2 sets of 4
+        case 9: // 1 set of 5 + 1 set of 3
         {
             std::vector<int> *cardPointer;
             int p = 0;
+            bool countTwins = false;
             std::map<int, int> countMap;
 
             if(currentPlayer == 0)
@@ -588,12 +590,25 @@ bool cards::checkPhase()
             }
             for(auto &i : countMap)
             {
-                if(i.second == 4)
-                    p++;
-                if(i.second == 8)
-                    p = 2;
-                if(i.second > 4 && i.second < 8)
-                    p = 1;
+                if(playerPhase == 7)
+                {
+                    if(i.second == 4)
+                        p++;
+                    if(i.second == 8)
+                        p = 2;
+                    if(i.second > 4 && i.second < 8)
+                        p = 1;
+                }
+                else
+                {
+                    if(i.second == 5)
+                        p++;
+                    if(i.second == 3 && countTwins == false)
+                    {
+                        p++;
+                        countTwins = true;
+                    }
+                }
             }
 
             if(p == 2)
@@ -647,14 +662,26 @@ bool cards::checkPhase()
         }
 
         case 8: // 1 run of 4 of one color + 1 set of 3
+        case 10: // 1 set of 5 + 1 run of 3 of one color
         {
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
             std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards, *cardPointer;
-            int k = 0, l = 0, p = 0, m = 0;
+            int k = 0, l = 0, p = 0, m = 0, limit_run = 0, limit_set = 0;
             bool run = false;
             bool set = false;
+
+            if(playerPhase == 8)
+            {
+                limit_run = 4;
+                limit_set = 3;
+            }
+            else
+            {
+                limit_run = 3;
+                limit_set = 5;
+            }
 
             if(currentPlayer == 0)
             {
@@ -703,51 +730,26 @@ bool cards::checkPhase()
             redPairs.clear();
             greenPairs.clear();
 
-            vec_2d.push_back(blueUniques);
-            vec_2d.push_back(greenUniques);
-            vec_2d.push_back(redUniques);
-            vec_2d.push_back(yellowUniques);
-            std::sort(vec_2d.begin(), vec_2d.end());
+            if(blueUniques.size() > 3)
+                vec_2d.push_back(blueUniques);
+            if(greenUniques.size() > 3)
+                vec_2d.push_back(greenUniques);
+            if(redUniques.size() > 3)
+                vec_2d.push_back(redUniques);
+            if(yellowUniques.size() > 3)
+                vec_2d.push_back(yellowUniques);
 
+            std::sort(vec_2d.begin(), vec_2d.end());
 
             for(unsigned int i = 0; i < vec_2d.size(); i++)
             {
-                for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
+                if(vec_2d.at(i).size() >= 3)
                 {
-
-                   if(vec_2d.at(i).size() > 3)
-                   {
-                       if(j == vec_2d.at(i).size()-1)
-                       {
-                           if(vec_2d.at(i).at(j-1).first+1 == vec_2d.at(i).at(j).first)
+                    for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
+                    {
+                           if(j == vec_2d.at(i).size()-1)
                            {
-                               l++;
-                               if(l>k)
-                                   k=l;
-                               if(k == 4)
-                               {
-                                   while(m < 4)
-                                   {
-                                        twinPairs.push_back(vec_2d.at(i).at(j-m));
-                                        m++;
-                                   }
-                               }
-                           }
-                       }
-                       else
-                       {
-                           if(j == 0)
-                           {
-                               if(vec_2d.at(i).at(j).first+1 == vec_2d.at(i).at(j+1).first)
-                               {
-                                   l++;
-                                   if(l>k)
-                                       k=l;
-                               }
-                           }
-                           else
-                           {
-                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first == 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first == 1))
+                               if(vec_2d.at(i).at(j-1).first+1 == vec_2d.at(i).at(j).first)
                                {
                                    l++;
                                    if(l>k)
@@ -761,15 +763,46 @@ bool cards::checkPhase()
                                        }
                                    }
                                }
-                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
+                           }
+                           else
+                           {
+                               if(j == 0)
                                {
-                                   if(l>k)
-                                       k=l;
-                                   l = 0;
+                                   if(vec_2d.at(i).at(j).first+1 == vec_2d.at(i).at(j+1).first)
+                                   {
+                                       l++;
+                                       if(l>k)
+                                           k=l;
+                                   }
+                               }
+                               else
+                               {
+                                   if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first == 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first == 1))
+                                   {
+                                       l++;
+                                       if(l>k)
+                                           k=l;
+                                       if(k == 4)
+                                       {
+                                           while(m < 4)
+                                           {
+                                                twinPairs.push_back(vec_2d.at(i).at(j-m));
+                                                m++;
+                                           }
+                                       }
+                                   }
+                                   if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
+                                   {
+                                       if(l>k)
+                                           k=l;
+                                       l = 1;
+                                   }
                                }
                            }
-                       }
-                    }
+                        }
+                    if(l>k)
+                        k=l;
+                    l = 1;
                 }
             }
             if(!twinPairs.empty())
@@ -796,9 +829,11 @@ bool cards::checkPhase()
                     p=i.second;
                 }
             }
-            if(k>=4)
+            std::cout << "k: " << k << '\n';
+            std::cout << "p: " << p << '\n';
+            if(k>=limit_run)
                 run = true;
-            if(p>=3)
+            if(p>=limit_set)
                 set = true;
 
             if(run == true && set == true)
@@ -821,7 +856,6 @@ bool cards::checkPhase()
                     {
                         std::cout << "These are your laid out cards: \n";
                         getPlayerCards(1);
-                        break;
                     }
                 }
                 else
@@ -839,23 +873,16 @@ bool cards::checkPhase()
                         else
                             std::cout << "One or more of your phases requirments are not met. Keep collecting.\n";
                     }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                        getPlayerCards(1);
+                    }
                 }
                 else
                     std::cout << "The computer couldn't finish phase " << computerPhase << ".\n";
                 return false;
             }
-            break;
-        }
-
-        case 9: // 1 set of 5 + 1 set of 3
-        {
-            std::cout << "9 in the making...\n";
-            break;
-        }
-
-        case 10: // 1 set of 5 + 1 run of 3 of one color
-        {
-            std::cout << "10 in the making...\n";
             break;
         }
     }
@@ -880,7 +907,7 @@ void cards::layOutPhase()
             std::getline(std::cin, line);
             std::stringstream ss(line);
 
-            if(playerPhase == 1 || playerPhase == 3 || playerPhase == 4 || playerPhase == 7)
+            if(playerPhase == 1 || playerPhase == 3 || playerPhase == 4 || playerPhase == 7 || playerPhase == 9 || playerPhase == 10)
                 limit = 8;
             if(playerPhase == 6)
                 limit = 9;
@@ -903,9 +930,6 @@ void cards::layOutPhase()
                     cardPositions.push_back(number-1);
                 }
             }
-            std::cout << "playerPhaseCards: " << playerPhaseCards.size() << "\n";
-            for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
-                std::cout << playerPhaseCards.at(i).first << " " << playerPhaseCards.at(i).second << '\n';
 
             updateCardProperties();
 
@@ -974,6 +998,7 @@ bool cards::addPhaseCards()
     {
         case 1:
         case 7:
+        case 9:
         {
             std::vector<int> *pPhaseCards,*pPlayerCards;
             if(currentPlayer == 0)
@@ -1179,6 +1204,7 @@ bool cards::addPhaseCards()
         break;
         }
         case 8:
+        case 10:
         {
             std::map<int, int> countMap;
             std::vector<std::pair<int, std::string>> tempPairs;

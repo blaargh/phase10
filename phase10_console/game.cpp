@@ -99,7 +99,7 @@ void game::playerTurn()
                         std::cin.clear();
                         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                     }
-                    if(c <= 0 || c >= 11)
+                    if(c <= 0 || c > 11)
                     {
                         std::cout << "The card position you entered does not exist, please select option 3 again and re-enter your card.\n";
                         break;
