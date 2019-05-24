@@ -642,13 +642,19 @@ bool cards::checkPhase()
 
         case 8: // 1 run of 4 of one color + 1 set of 3
         {
+            if(playerPhaseOut == true)
+            {
+                std::cout << "These are your laid out cards: \n";
+                getPlayerCards(1);
+                break;
+            }
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
             std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards, *cardPointer;
             int k = 0, l = 0, p = 0, m = 0;
-//            bool run = false;
-//            bool set = false;
+            bool run = false;
+            bool set = false;
 
             if(currentPlayer == 0)
             {
@@ -759,7 +765,7 @@ bool cards::checkPhase()
                                {
                                    if(l>k)
                                        k=l;
-                                   l = 1;
+                                   l = 0;
                                }
                            }
                        }
@@ -790,15 +796,12 @@ bool cards::checkPhase()
                     p=i.second;
                 }
             }
-//            if(k>=4)
-//                run = true;
-//            if(p>=3)
-//                set = true;
+            if(k>=4)
+                run = true;
+            if(p>=3)
+                set = true;
 
-            std::cout << "run = " << k << '\n';
-            std::cout << "set = " << p << '\n';
-
-            if(twinPairs.size() == 4 && p>= 3)
+            if(run == true && set == true)
             {
                 if(currentPlayer == 0)
                 {
@@ -813,11 +816,6 @@ bool cards::checkPhase()
                             std::cout << "Phase " << playerPhase << " done!\n";
                             layOutPhase();
                         }
-                    }
-                    else
-                    {
-                        std::cout << "These are your laid out cards: \n";
-                        getPlayerCards(1);
                     }
                 }
                 else
@@ -834,11 +832,6 @@ bool cards::checkPhase()
                             return false;
                         else
                             std::cout << "You have not finished the phase. You currently have a run of " << k << " card(s) of the same color\nand a potential set of " << p << ". Keep collecting.\n";
-                    }
-                    else
-                    {
-                        std::cout << "These are your laid out cards: \n";
-                            getPlayerCards(1);
                     }
                 }
                 else
@@ -860,7 +853,7 @@ bool cards::checkPhase()
             break;
         }
     }
-    std::cout << "nothing, returning false\n";
+
     return false;
 }
 
