@@ -642,12 +642,6 @@ bool cards::checkPhase()
 
         case 8: // 1 run of 4 of one color + 1 set of 3
         {
-            if(playerPhaseOut == true)
-            {
-                std::cout << "These are your laid out cards: \n";
-                getPlayerCards(1);
-                break;
-            }
             std::vector<int> intTwins;
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
@@ -715,7 +709,7 @@ bool cards::checkPhase()
                 for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
                 {
 
-                   if(vec_2d.at(i).size() >= 2)
+                   if(vec_2d.at(i).size() >= 4)
                    {
                        if(j == vec_2d.at(i).size()-1)
                        {
@@ -817,6 +811,12 @@ bool cards::checkPhase()
                             layOutPhase();
                         }
                     }
+                    else
+                    {
+                        std::cout << "These are your laid out cards: \n";
+                        getPlayerCards(1);
+                        break;
+                    }
                 }
                 else
                     std::cout << "The computer finished phase " << computerPhase << ".\n";
@@ -825,13 +825,13 @@ bool cards::checkPhase()
             else
             {
                 if(currentPlayer == 0)
-                {
+                {  
                     if(playerPhaseOut == false)
                     {
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "You have not finished the phase. You currently have a run of " << k << " card(s) of the same color\nand a potential set of " << p << ". Keep collecting.\n";
+                            std::cout << "One or more of your phases requirments are not met. Keep collecting.\n";
                     }
                 }
                 else
@@ -841,7 +841,7 @@ bool cards::checkPhase()
             break;
         }
 
-        case 9: // 1 set of 5 + 1 set of 3;
+        case 9: // 1 set of 5 + 1 set of 3
         {
             std::cout << "9 in the making...\n";
             break;
