@@ -108,6 +108,8 @@ void cards::drawCard()
 
 bool cards::checkPhase()
 {
+    updateCardProperties();
+
     switch(playerPhase)
     {
         case 1: // 4 sets of 2
@@ -687,7 +689,6 @@ bool cards::checkPhase()
             std::unique_copy(redPairs.begin(), redPairs.end(), std::back_inserter(redUniques));
             std::unique_copy(greenPairs.begin(), greenPairs.end(), std::back_inserter(greenUniques));
 
-
             std::sort(blueUniques.begin(), blueUniques.end());
             std::sort(greenUniques.begin(), greenUniques.end());
             std::sort(redUniques.begin(), redUniques.end());
@@ -783,10 +784,8 @@ bool cards::checkPhase()
                     p=i.second;
                 }
             }
-
             if(k>=4)
                 run = true;
-
             if(p>=3)
                 set = true;
 
@@ -825,7 +824,7 @@ bool cards::checkPhase()
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "You have not finished the phase. You currently have a run of " << k << " cards of the same color\nand a set of " << p << ". Keep collecting.\n";
+                            std::cout << "You have not finished the phase. You currently have a run of " << k << " cards of the same color\nand a potential set of " << p << ". Keep collecting.\n";
                     }
                     else
                     {
@@ -896,6 +895,9 @@ void cards::layOutPhase()
                     cardPositions.push_back(number-1);
                 }
             }
+            std::cout << "playerPhaseCards: " << playerPhaseCards.size() << "\n";
+            for(unsigned int i = 0; i < playerPhaseCards.size(); i++)
+                std::cout << playerPhaseCards.at(i).first << " " << playerPhaseCards.at(i).second << '\n';
 
             updateCardProperties();
 
@@ -1053,7 +1055,6 @@ bool cards::addPhaseCards()
         case 3:
         case 4:
         case 6:
-        case 8:
         {
             std::map<int, int> countMap;
             std::vector<int> intPlayerCards, intUniques, intTwins;
@@ -1160,9 +1161,144 @@ bool cards::addPhaseCards()
                             }
                         }
                     }
+                    else
+                    {
+                        std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match either the set or the run!\n";
+                        return false;
+                    }
                 }
             }
         break;
+        }
+        case 8:
+        {
+            std::map<int, int> countMap;
+            std::vector<std::pair<int, std::string>> tempPairs;
+            std::vector<int> intTwins;
+            int k = 0, l = 0;
+            for(auto &i : playerPhaseCardValues)
+            {
+                auto result = countMap.insert(std::pair<int, int>(i, 1));
+                if(result.second == false)
+                {
+                    result.first->second++;
+                }
+            }
+            for(auto &i : countMap)
+            {
+                if(i.second > 1)
+                {
+                    k=i.first;
+                    while(std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), k) != playerPhaseCardValues.end() && l < i.second)
+                    {
+                        intTwins.push_back(k);
+                        l++;
+                    }
+                }
+            }
+            for(unsigned int j = 0; j < playerPhaseCards.size(); j++)
+            {
+                if(playerPhaseCards.at(j).first != k)
+                    tempPairs.push_back(playerPhaseCards.at(j));
+            }
+
+            if(std::find(intTwins.begin(), intTwins.end(), playerCards.at(c).first) != intTwins.end())
+            {
+                if(playerCards.size() == 1)
+                {
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                    return true;
+                }
+                else
+                {
+                    playerPhaseCards.push_back(playerCards.at(c));
+                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out set!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                    return true;
+                }
+            }
+            else
+            {
+                if(playerCards.at(c).first == 1)
+                {
+                    if(std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), playerCards.at(c).first+1) != playerPhaseCardValues.end())
+                    {
+                        if(std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), playerCards.at(c).first) != playerPhaseCardValues.end())
+                        {
+                            std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << "  to your phase on the board, it already exists in the run!\n";
+                            return false;
+                        }
+                        else
+                        {
+                            if(playerCards.at(c).second == tempPairs.at(0).second)
+                            {
+                                if(playerCards.size() == 1)
+                                {
+                                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                                    return true;
+                                }
+                                else
+                                {
+                                    playerPhaseCards.push_back(playerCards.at(c));
+                                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match the color of the run!\n";
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match either the set or the run!\n";
+                        return false;
+                    }
+                }
+                if(playerCards.at(c).first != 1)
+                {
+                    if(std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), playerCards.at(c).first-1) != playerPhaseCardValues.end() || std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), playerCards.at(c).first+1) != playerPhaseCardValues.end())
+                    {
+                        if(std::find(playerPhaseCardValues.begin(), playerPhaseCardValues.end(), playerCards.at(c).first) != playerPhaseCardValues.end())
+                        {
+                            std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it already exists in the run!\n";
+                            return false;
+                        }
+                        else
+                        {
+                            if(playerCards.at(c).second == tempPairs.at(0).second)
+                            {
+                                if(playerCards.size() == 1)
+                                {
+                                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                                    return true;
+                                }
+                                else
+                                {
+                                    playerPhaseCards.push_back(playerCards.at(c));
+                                    std::cout << "You added " << playerPhaseCards.at(playerPhaseCards.size()-1).first << " " << playerPhaseCards.at(playerPhaseCards.size()-1).second << " to your laid out run!\nOnly " << playerCards.size()-1 << " more card(s) to get rid of to win this round!\n";
+                                    playerCards.erase(std::remove(playerCards.begin(), playerCards.end(), playerCards.at(c)), playerCards.end());
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match the color of the run!\n";
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        std::cout << "Can't add " << playerCards.at(c).first << " " << playerCards.at(c).second << " to your phase on the board, it doesnt match either the set or the run!\n";
+                        return false;
+                    }
+                }
+            }
+            break;
         }
     }
     return 0;
