@@ -709,7 +709,7 @@ bool cards::checkPhase()
                 for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
                 {
 
-                   if(vec_2d.at(i).size() >= 4)
+                   if(vec_2d.at(i).size() > 3)
                    {
                        if(j == vec_2d.at(i).size()-1)
                        {
