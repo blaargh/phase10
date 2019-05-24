@@ -646,11 +646,9 @@ bool cards::checkPhase()
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
             std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards, *cardPointer;
-            int k = 0;
-            int l = 0;
-            int p = 0;
-            bool run = false;
-            bool set = false;
+            int k = 0, l = 0, p = 0, m = 0;
+//            bool run = false;
+//            bool set = false;
 
             if(currentPlayer == 0)
             {
@@ -711,7 +709,7 @@ bool cards::checkPhase()
                 for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
                 {
 
-                   if(vec_2d.at(i).size() >= 4)
+                   if(vec_2d.at(i).size() >= 2)
                    {
                        if(j == vec_2d.at(i).size()-1)
                        {
@@ -722,8 +720,11 @@ bool cards::checkPhase()
                                    k=l;
                                if(k == 4)
                                {
-                                   for(unsigned int m = 0; m < 4; m++)
+                                   while(m < 4)
+                                   {
                                         twinPairs.push_back(vec_2d.at(i).at(j-m));
+                                        m++;
+                                   }
                                }
                            }
                        }
@@ -747,12 +748,17 @@ bool cards::checkPhase()
                                        k=l;
                                    if(k == 4)
                                    {
-                                       for(unsigned int m = 0; m < 4; m++)
+                                       while(m < 4)
+                                       {
                                             twinPairs.push_back(vec_2d.at(i).at(j-m));
+                                            m++;
+                                       }
                                    }
                                }
                                if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
                                {
+                                   if(l>k)
+                                       k=l;
                                    l = 1;
                                }
                            }
@@ -784,12 +790,15 @@ bool cards::checkPhase()
                     p=i.second;
                 }
             }
-            if(k>=4)
-                run = true;
-            if(p>=3)
-                set = true;
+//            if(k>=4)
+//                run = true;
+//            if(p>=3)
+//                set = true;
 
-            if(run == true && set == true)
+            std::cout << "run = " << k << '\n';
+            std::cout << "set = " << p << '\n';
+
+            if(twinPairs.size() == 4 && p>= 3)
             {
                 if(currentPlayer == 0)
                 {
@@ -824,7 +833,7 @@ bool cards::checkPhase()
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "You have not finished the phase. You currently have a run of " << k << " cards of the same color\nand a potential set of " << p << ". Keep collecting.\n";
+                            std::cout << "You have not finished the phase. You currently have a run of " << k << " card(s) of the same color\nand a potential set of " << p << ". Keep collecting.\n";
                     }
                     else
                     {
@@ -1503,6 +1512,17 @@ void cards::getCurrentPhaseDescr()
             std::cout << "You are currently in Phase 8. It requires 1 run of 4 of one color and 1 set of 3.\n";
             break;
         }
+        case 9:
+        {
+            std::cout << "You are currently in Phase 9. Itr requires 1 set of 5 and 1 set of 3.\n";
+            break;
+        }
+        case 10:
+        {
+            std::cout << "You are currently in Phase 10. It requires 1 set of 5 and 1 run of 3 of one color.\n";
+            break;
+        }
+
 
     }
 }
