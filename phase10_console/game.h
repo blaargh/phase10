@@ -1,3 +1,9 @@
+/*
+  Copyright (c) 2019 blaargh
+  game.h
+  https://github.com/blaargh/phase10
+*/
+
 #ifndef GAME_H
 #define GAME_H
 #include <cards.h>

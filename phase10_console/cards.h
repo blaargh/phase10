@@ -1,3 +1,10 @@
+/*
+  Copyright (c) 2019 blaargh
+  cards.h
+  https://github.com/blaargh/phase10
+*/
+
+
 #ifndef CARDS_H
 #define CARDS_H
 #include <vector>

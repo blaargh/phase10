@@ -1,3 +1,10 @@
+/*
+  Copyright (c) 2019 blaargh
+  game.cpp
+  https://github.com/blaargh/phase10
+*/
+
+
 #include "game.h"
 #include "cards.h"
 #include <iostream>

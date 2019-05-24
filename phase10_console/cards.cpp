@@ -1,3 +1,9 @@
+/*
+  Copyright (c) 2019 blaargh
+  cards.cpp
+  https://github.com/blaargh/phase10
+*/
+
 #include "cards.h"
 #include <iostream>
 #include <ctime>
