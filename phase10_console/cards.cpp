@@ -668,7 +668,7 @@ bool cards::checkPhase()
             std::map<int, int> countMap;
             std::vector<std::vector<std::pair<int, std::string>>> vec_2d;
             std::vector<std::pair<int, std::string>> bluePairs, blueUniques, greenPairs, greenUniques, redPairs, redUniques, yellowPairs, yellowUniques, twinPairs, locPlayerCards, *cardPointer;
-            int k = 0, l = 0, p = 0, m = 0, limit_run = 0, limit_set = 0;
+            int limit_run = 0, limit_set = 0, k = 0, l = 0,m = 0, p = 0;
             bool run = false;
             bool set = false;
 
@@ -676,6 +676,7 @@ bool cards::checkPhase()
             {
                 limit_run = 4;
                 limit_set = 3;
+
             }
             else
             {
@@ -700,110 +701,106 @@ bool cards::checkPhase()
             {
                 if(locPlayerCards.at(i).second == "blue")
                 {
-                    bluePairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    bluePairs.push_back(locPlayerCards.at(i));
                 }
                 if(locPlayerCards.at(i).second == "green")
                 {
-                    greenPairs.push_back(std::make_pair(playerCards.at(i).first, locPlayerCards.at(i).second));
+                    greenPairs.push_back(locPlayerCards.at(i));
                 }
                 if(locPlayerCards.at(i).second == "red")
                 {
-                    redPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    redPairs.push_back(locPlayerCards.at(i));
                 }
                 if(locPlayerCards.at(i).second == "yellow")
                 {
-                    yellowPairs.push_back(std::make_pair(locPlayerCards.at(i).first, locPlayerCards.at(i).second));
+                    yellowPairs.push_back(locPlayerCards.at(i));
                 }
             }
+            std::sort(bluePairs.begin(), bluePairs.end());
+            std::sort(greenPairs.begin(), greenPairs.end());
+            std::sort(redPairs.begin(), redPairs.end());
+            std::sort(yellowPairs.begin(), yellowPairs.end());
+
             std::unique_copy(bluePairs.begin(), bluePairs.end(), std::back_inserter(blueUniques));
             std::unique_copy(yellowPairs.begin(), yellowPairs.end(), std::back_inserter(yellowUniques));
             std::unique_copy(redPairs.begin(), redPairs.end(), std::back_inserter(redUniques));
             std::unique_copy(greenPairs.begin(), greenPairs.end(), std::back_inserter(greenUniques));
-
-            std::sort(blueUniques.begin(), blueUniques.end());
-            std::sort(greenUniques.begin(), greenUniques.end());
-            std::sort(redUniques.begin(), redUniques.end());
-            std::sort(yellowUniques.begin(), yellowUniques.end());
 
             bluePairs.clear();
             yellowPairs.clear();
             redPairs.clear();
             greenPairs.clear();
 
-            if(blueUniques.size() > 3)
-                vec_2d.push_back(blueUniques);
-            if(greenUniques.size() > 3)
-                vec_2d.push_back(greenUniques);
-            if(redUniques.size() > 3)
-                vec_2d.push_back(redUniques);
-            if(yellowUniques.size() > 3)
-                vec_2d.push_back(yellowUniques);
+            vec_2d.push_back(blueUniques);
+            vec_2d.push_back(greenUniques);
+            vec_2d.push_back(redUniques);
+            vec_2d.push_back(yellowUniques);
 
             std::sort(vec_2d.begin(), vec_2d.end());
 
             for(unsigned int i = 0; i < vec_2d.size(); i++)
             {
-                if(vec_2d.at(i).size() >= 3)
+                for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
                 {
-                    for(unsigned int j = 0; j < vec_2d.at(i).size(); j++)
+                    if(vec_2d.at(i).size() >= 3)
                     {
-                           if(j == vec_2d.at(i).size()-1)
+                       if(j == vec_2d.at(i).size()-1)
+                       {
+                           if(vec_2d.at(i).at(j-1).first+1 == vec_2d.at(i).at(j).first)
                            {
-                               if(vec_2d.at(i).at(j-1).first+1 == vec_2d.at(i).at(j).first)
+                               l++;
+                               if(l>k)
+                                   k=l;
+                               if(k == limit_run)
+                               {
+                                   while(m < limit_run)
+                                   {
+                                        twinPairs.push_back(vec_2d.at(i).at(j-m));
+                                        m++;
+                                   }
+                               }
+                           }
+                       }
+                       else
+                       {
+                           if(j == 0)
+                           {
+                               if(vec_2d.at(i).at(j).first+1 == vec_2d.at(i).at(j+1).first)
                                {
                                    l++;
                                    if(l>k)
                                        k=l;
-                                   if(k == 4)
+                               }
+                           }
+                           else
+                           {
+                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first == 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first == 1))
+                               {
+                                   l++;
+                                   if(l>k)
+                                       k=l;
+                                   if(k == limit_run)
                                    {
-                                       while(m < 4)
+                                       while(m < limit_run)
                                        {
                                             twinPairs.push_back(vec_2d.at(i).at(j-m));
                                             m++;
                                        }
                                    }
                                }
-                           }
-                           else
-                           {
-                               if(j == 0)
+                               if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
                                {
-                                   if(vec_2d.at(i).at(j).first+1 == vec_2d.at(i).at(j+1).first)
-                                   {
-                                       l++;
-                                       if(l>k)
-                                           k=l;
-                                   }
-                               }
-                               else
-                               {
-                                   if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first == 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first == 1))
-                                   {
-                                       l++;
-                                       if(l>k)
-                                           k=l;
-                                       if(k == 4)
-                                       {
-                                           while(m < 4)
-                                           {
-                                                twinPairs.push_back(vec_2d.at(i).at(j-m));
-                                                m++;
-                                           }
-                                       }
-                                   }
-                                   if((vec_2d.at(i).at(j+1).first-vec_2d.at(i).at(j).first != 1) || (vec_2d.at(i).at(j).first-vec_2d.at(i).at(j-1).first != 1))
-                                   {
-                                       if(l>k)
-                                           k=l;
-                                       l = 1;
-                                   }
+                                   if(l>k)
+                                       k=l;
+                                   l = 1;
                                }
                            }
-                        }
-                    if(l>k)
-                        k=l;
-                    l = 1;
+                       }
+                    }
                 }
+                if(l>k)
+                    k=l;
+                l = 0;
             }
             if(!twinPairs.empty())
             {
@@ -886,7 +883,6 @@ bool cards::checkPhase()
             break;
         }
     }
-
     return false;
 }
 
@@ -1539,7 +1535,7 @@ void cards::getCurrentPhaseDescr()
         }
         case 9:
         {
-            std::cout << "You are currently in Phase 9. Itr requires 1 set of 5 and 1 set of 3.\n";
+            std::cout << "You are currently in Phase 9. It requires 1 set of 5 and 1 set of 3.\n";
             break;
         }
         case 10:
