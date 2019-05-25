@@ -826,8 +826,6 @@ bool cards::checkPhase()
                     p=i.second;
                 }
             }
-            std::cout << "k: " << k << '\n';
-            std::cout << "p: " << p << '\n';
             if(k>=limit_run)
                 run = true;
             if(p>=limit_set)
@@ -868,7 +866,7 @@ bool cards::checkPhase()
                         if(!playerPhaseCards.empty())
                             return false;
                         else
-                            std::cout << "One or more of your phases requirments are not met. Keep collecting.\n";
+                            std::cout << "One or more of the phases requirements are not met, keep collecting.\n";
                     }
                     else
                     {
