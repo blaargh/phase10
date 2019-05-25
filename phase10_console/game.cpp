@@ -165,6 +165,11 @@ void game::congrats()
     std::cout << " #       #    # #  # # #  ### #####  ######   #   #    # #      ######   #   # #    # #  # #      # \n";
     std::cout << " #     # #    # #   ## #    # #   #  #    #   #   #    # #      #    #   #   # #    # #   ## #    # \n";
     std::cout << "  #####   ####  #    #  ####  #    # #    #   #    ####  ###### #    #   #   #  ####  #    #  ####  \n";
+    if(cardStack.getPlayerPhase() == 10)
+    {
+        std::cout << "\n\t\tYOU WON PHASE 10.\n";
+        exit(0);
+    }
     cardStack.initiateNextRound();
     comCheck = false;
     gameStart();
